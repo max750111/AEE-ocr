@@ -1,36 +1,33 @@
 import cv2
-import numpy as np
 
 
 # 定义保存图片函数
 # image:要保存的图片名字
 # addr；图片地址与相片名字的前部分
 # num: 相片，名字的后缀。int 类型
-def save_image(image, addr, num):
-    address = addr + str(num) + '.jpg'
+
+def save_image(image, num):
+    address = './output/' + 'image' + str(num) + '.jpg'
     cv2.imwrite(address, image)
 
 
-# 读取视频文件
+# 讀取影片檔
 videoCapture = cv2.VideoCapture("1.mp4")
-# 通过摄像头的方式
-# videoCapture=cv2.VideoCapture(1)
-#print(videoCapture.get(cv2.CAP_PROP_FPS))
-#print(videoCapture.get(cv2.CAP_PROP_FRAME_COUNT))
-#print(videoCapture.get(cv2.CAP_PROP_POS_FRAMES))
+# videoCapture.get(cv2.CAP_PROP_FPS)
+# videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
+# videoCapture.get(cv2.CAP_PROP_POS_FRAMES)
+
 # 读帧
 success, frame = videoCapture.read()
-#print(videoCapture.get(cv2.CAP_PROP_POS_FRAMES))
-#print(videoCapture.get(cv2.CAP_PROP_POS_FRAMES))
 
+timeF = 7  # 設定多少幀截圖
 i = 0
-timeF = 7
 j = 0
 while success:
     i = i + 1
-    if (i % timeF == 0):
+    if i % timeF == 0:
         j = j + 1
-        save_image(frame, './output/image', j)
+        save_image(frame, j)
         print('save image:', i)
     success, frame = videoCapture.read()
 videoCapture.release()
