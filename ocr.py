@@ -51,7 +51,7 @@ def change_color_resize(queue_job):
         for i in range(height):
             for j in range(width):
                 img_result[i, j] = 255 - img[i, j]  # img_result為轉換後的圖片
-        crop_img = img_result[y:y + h, x:x + w]
+        crop_img = img_result[230:1100, 80:980]
         cv2.imwrite('./result/' + img, crop_img)
 
 
@@ -66,8 +66,8 @@ def ocr():
 
 
 def main():
-    pass
-    #load_film('1.mp4')
+    #pass
+    load_film('1.mp4')
 
 
 if __name__ == "__main__":
