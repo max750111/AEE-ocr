@@ -16,9 +16,12 @@ videoCapture = cv2.VideoCapture("1.mp4")
 # videoCapture.get(cv2.CAP_PROP_FPS)
 # videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
 # videoCapture.get(cv2.CAP_PROP_POS_FRAMES)
+# CAP_PROP_FRAME_WIDTH
+# CAP_PROP_FRAME_HEIGHT
 
 # 读帧
 success, frame = videoCapture.read()
+print(type(frame))
 
 timeF = 7  # 設定多少幀截圖
 i = 0
