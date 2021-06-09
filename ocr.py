@@ -52,7 +52,7 @@ def change_color_resize(queue_job):
             for j in range(width):
                 img_result[i, j] = 255 - img[i, j]  # img_result為轉換後的圖片
         crop_img = img_result[230:1100, 80:980]
-        cv2.imwrite('./result/' + img, crop_img)
+        cv2.imwrite(img.replace("output", "result"), crop_img)
 
 
 # 文字辨識(未完成)
