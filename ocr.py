@@ -36,7 +36,7 @@ def save_image(image, num):
 def load_film(film_filename):
     video_capture = cv2.VideoCapture(film_filename)
 
-    per_frame = 5  # 設定多少幀截圖
+    per_frame = 20  # 設定多少幀截圖
     i = 0
     j = 0
     while True:
@@ -61,19 +61,18 @@ def queue_img(path):
 # 黑白反轉，增加辨識準確率，轉換結果放到result資料夾
 def change_color_crop(image):
     for img in image:
-        img_origin = cv2.imread("./output/" + img, 1)
-        gray = cv2.cvtColor(img_origin, cv2.COLOR_BGR2GRAY)
-        img_result = 255 - gray
-        crop_img = img_result[230:1100, 80:980]
+        img_origin = cv2.imread("./output/" + img, cv2.IMREAD_GRAYSCALE)
+        img_result = 255 - img_origin
+        crop_img = img_result[225:1100, 80:980]
         cv2.imwrite("./result/" + img, crop_img)
 
 
 def all_name(transcript_list):
     for index, str in enumerate(transcript_list):
         if str.startswith("M:"):
-            transcript_list[index] = transcript_list[index].replace("M:", "\nMichelle:")
+            transcript_list[index] = transcript_list[index].replace("M:", "\n\nMichelle:")
         elif str.startswith("L:"):
-            transcript_list[index] = transcript_list[index].replace("L:", "\nLindsay:")
+            transcript_list[index] = transcript_list[index].replace("L:", "\n\nLindsay:")
 
 
 transcript = []
@@ -87,16 +86,17 @@ def ocr():
         img_for_ocr = cv2.imread("./result/" + img_file)
         a = pytesseract.image_to_string(img_for_ocr, lang="eng", config="--oem 1 --psm 6")
         a = a.strip()  # 去除最後的空白字元
+        a = a.replace("|", "I")
         ocr_result = a.split("\n")  # 用\n分割每行，存成列表
-        ocr_result = [x for x in ocr_result if x != ' ']
-        print(ocr_result)
+        ocr_result = [x for x in ocr_result if x != (' ' and '')]
+        # print(ocr_result)
         for str in ocr_result[2:-4]:
-            if str not in transcript[-11:]:
+            if str not in transcript[-15:]:
                 transcript.append(str)
     print(transcript)
     all_name(transcript)
     transcript_final = " ".join(transcript)
-    #print(transcript_final)
+    print(transcript_final)
 
     pyperclip.copy(transcript_final)
 
