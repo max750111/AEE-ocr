@@ -2,22 +2,7 @@ import pytesseract
 import cv2
 from os import listdir
 import pyperclip
-
-
-def resize_image(frame):
-    """
-
-    """
-    scale_percent = 80
-
-    width = int(frame.shape[1] * scale_percent / 100)
-    height = int(frame.shape[0] * scale_percent / 100)
-
-    dsize = (width, height)
-
-    output = cv2.resize(frame, dsize)
-
-    return output
+import difflib
 
 
 # 截取圖片存在output資料夾
@@ -33,10 +18,11 @@ def save_image(image, num):
 
 
 # 讀取影片檔並截圖
+# 要設定多少幀截一張圖
 def load_film(film_filename):
     video_capture = cv2.VideoCapture(film_filename)
 
-    per_frame = 20  # 設定多少幀截圖
+    per_frame = 7  # 設定多少幀截圖
     i = 0
     j = 0
     while True:
@@ -52,19 +38,31 @@ def load_film(film_filename):
     video_capture.release()
 
 
-# 讀取所有放在image資料夾待辨識圖片檔檔名，存在queue_job列表
+# 讀取所有放在image資料夾待辨識圖片檔檔名並回傳成list
 def queue_img(path):
     files = listdir(path)
     return files  # list
 
 
 # 黑白反轉，增加辨識準確率，轉換結果放到result資料夾
-def change_color_crop(image):
-    for img in image:
+def change_color_crop(image_filename):
+    for img in image_filename:
         img_origin = cv2.imread("./output/" + img, cv2.IMREAD_GRAYSCALE)
         img_result = 255 - img_origin
         crop_img = img_result[225:1100, 80:980]
         cv2.imwrite("./result/" + img, crop_img)
+
+# 檢查辨識過後的字串若己經存在結果列表中（相似度超過80%），則返回False
+# 要設定相似度
+def delete_repeat(str, list):
+    result = 1
+    if list:
+        for i in list[-15:]:
+            # print(i)
+            if difflib.SequenceMatcher(None, str, i).quick_ratio() > 0.9:
+                result = 0
+                break
+    return result
 
 
 def all_name(transcript_list):
@@ -86,25 +84,29 @@ def ocr():
         img_for_ocr = cv2.imread("./result/" + img_file)
         a = pytesseract.image_to_string(img_for_ocr, lang="eng", config="--oem 1 --psm 6")
         a = a.strip()  # 去除最後的空白字元
-        a = a.replace("|", "I")
+        a = a.replace("|", "I")  # 修正辨識內容
         ocr_result = a.split("\n")  # 用\n分割每行，存成列表
-        ocr_result = [x for x in ocr_result if x != (' ' and '')]
-        # print(ocr_result)
-        for str in ocr_result[2:-4]:
-            if str not in transcript[-15:]:
+        ocr_result = [x for x in ocr_result if x != (' ' and '')]  # 過濾掉空白字元
+        print(ocr_result)
+        for str in ocr_result[2:-3]:  # 去除圖片頭尾可能的亂碼
+            # 若辨識字串不在結果列表中或與結果列表中字串相似度不超過80%
+            # 將字串加入結果列表
+            if (str not in transcript[-15:]) and delete_repeat(str, transcript[-15:]):
+                # print(str)
                 transcript.append(str)
-    print(transcript)
-    all_name(transcript)
-    transcript_final = " ".join(transcript)
-    print(transcript_final)
-
+                # print(transcript)
+    # print(transcript)
+    all_name(transcript)  # 將名字縮寫還原
+    transcript_final = " ".join(transcript)  # 將字串列表還原成字串
+    # print(transcript_final)
+    #
     pyperclip.copy(transcript_final)
 
-
+# 程式進入點
 def main():
     # pass
-    load_film('1.mp4')
-    change_color_crop(queue_img("./output"))
+    # load_film('1.mp4')
+    # change_color_crop(queue_img("./output"))
     ocr()
 
 
