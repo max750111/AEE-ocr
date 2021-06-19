@@ -3,7 +3,7 @@ import cv2
 from os import listdir
 import pyperclip
 import difflib
-
+import time
 
 # 截取圖片存在output資料夾
 def save_image(image, num):
@@ -107,7 +107,12 @@ def main():
     # pass
     # load_film('1.mp4')
     # change_color_crop(queue_img("./output"))
+    t1 = time.time()
     ocr()
+    t2 = time.time()
+
+    tf = t2-t1
+    print(tf)
 
 
 if __name__ == "__main__":
