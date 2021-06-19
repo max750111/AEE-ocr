@@ -1,6 +1,8 @@
+import multiprocessing
+cpus = multiprocessing.cpu_count()
 
-str1 = " 'English Adventurer, '"
-list1 = [" “English Adventurer,’ ", ""]
-list = [1,2,3,4,5,6]
-for i in list:
-   print(1)
+print(cpus)
+
+list1 = [1,2,3]
+a = list1.append(3)
+print(a)
