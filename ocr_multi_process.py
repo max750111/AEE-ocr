@@ -1,3 +1,5 @@
+# 產出word檔
+
 import pytesseract
 import cv2
 from os import listdir, mkdir
@@ -6,6 +8,7 @@ import difflib
 from multiprocessing import Pool
 import time
 import shutil
+import tqdm
 
 
 # 截取圖片存在output資料夾
@@ -87,7 +90,7 @@ transcript = []
 # 文字辨識(未完成)
 def main_map(l):
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    print(l)
+    # print(l)
     img_for_ocr = cv2.imread("./result/" + l)
     a = pytesseract.image_to_string(img_for_ocr, lang="eng", config="--oem 1 --psm 6")
     a = a.strip()  # 去除最後的空白字元
@@ -99,17 +102,19 @@ def main_map(l):
 
 # 程式進入點
 def main():
-    # pass
-    # load_film('1.mp4')
-    # change_color_crop(queue_img("./output"))
-    # ocr()
     t1 = time.time()
-    load_film('./1/1591.mp4')
+    load_film('./1/1585.mp4')
     change_color_crop(queue_img("./output"))
-    pool = Pool(8)
+
+    with Pool(8) as p:
+        r = list(tqdm.tqdm(p.imap(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4]))),
+                           total=len(queue_img("./result"))))
+        outputs = list(r)
+
+    # pool = Pool(8)
 
     # 運行多處理程序
-    outputs = pool.map(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4])))
+    # outputs = pool.map(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4])))
     # print(outputs)
     for i in outputs:
         for str in i[2:-3]:  # 去除圖片頭尾可能的亂碼
@@ -122,7 +127,6 @@ def main():
     all_name(transcript)  # 將名字縮寫還原
     transcript_final = " ".join(transcript)  # 將字串列表還原成字串
     # print(transcript_final)
-    #
     pyperclip.copy(transcript_final)
 
     t2 = time.time()
