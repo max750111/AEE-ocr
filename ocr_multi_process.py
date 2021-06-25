@@ -9,6 +9,7 @@ from multiprocessing import Pool
 import time
 import shutil
 import tqdm
+from docx import Document
 
 
 # 截取圖片存在output資料夾
@@ -97,37 +98,45 @@ def main_map(l):
     a = a.replace("|", "I")  # 修正辨識內容
     ocr_result = a.split("\n")  # 用\n分割每行，存成列表
     ocr_result = [x for x in ocr_result if x != (' ' and '')]  # 過濾掉空白字元
-    return (ocr_result)
+    return ocr_result
 
 
 # 程式進入點
 def main():
     t1 = time.time()
-    load_film('./1/1585.mp4')
-    change_color_crop(queue_img("./output"))
 
-    with Pool(8) as p:
-        r = list(tqdm.tqdm(p.imap(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4]))),
-                           total=len(queue_img("./result"))))
-        outputs = list(r)
+    for v in queue_img('./video'):
+        load_film('./video/' + v)
 
-    # pool = Pool(8)
+        change_color_crop(queue_img("./output"))
 
-    # 運行多處理程序
-    # outputs = pool.map(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4])))
-    # print(outputs)
-    for i in outputs:
-        for str in i[2:-3]:  # 去除圖片頭尾可能的亂碼
-            # 若辨識字串不在結果列表中或與結果列表中字串相似度不超過80%
-            # 將字串加入結果列表
-            if (str not in transcript[-15:]) and delete_repeat(str, transcript[-15:]):
-                # print(str)
-                transcript.append(str)
-                # print(transcript)
-    all_name(transcript)  # 將名字縮寫還原
-    transcript_final = " ".join(transcript)  # 將字串列表還原成字串
-    # print(transcript_final)
-    pyperclip.copy(transcript_final)
+        with Pool(8) as p:
+            r = list(tqdm.tqdm(p.imap(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4]))),
+                               total=len(queue_img("./result"))))
+            outputs = list(r)
+
+        # pool = Pool(8)
+
+        # 運行多處理程序
+        # outputs = pool.map(main_map, sorted(queue_img("./result"), key=lambda x: int(x[-9:-4])))
+        # print(outputs)
+        for i in outputs:
+            for str in i[2:-3]:  # 去除圖片頭尾可能的亂碼
+                # 若辨識字串不在結果列表中或與結果列表中字串相似度不超過80%
+                # 將字串加入結果列表
+                if (str not in transcript[-15:]) and delete_repeat(str, transcript[-15:]):
+                    # print(str)
+                    transcript.append(str)
+                    # print(transcript)
+        all_name(transcript)  # 將名字縮寫還原
+        transcript_final = " ".join(transcript)  # 將字串列表還原成字串
+        # print(transcript_final)
+        pyperclip.copy(transcript_final)
+
+        doc = Document()
+
+        doc.add_paragraph(pyperclip.paste())
+        doc.save('./ocr_final/' + v[:-5] + '.docx')
 
     t2 = time.time()
 
