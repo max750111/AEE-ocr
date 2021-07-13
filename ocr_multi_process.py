@@ -3,7 +3,7 @@
 import pytesseract
 import cv2
 from os import listdir, mkdir
-import pyperclip
+# import pyperclip
 import difflib
 from multiprocessing import Pool
 import time
@@ -85,7 +85,7 @@ def all_name(transcript_list):
             transcript_list[index] = transcript_list[index].replace("L:", "\n\nLindsay:")
 
 
-transcript = []
+# transcript = []
 
 
 # 文字辨識(未完成)
@@ -106,6 +106,7 @@ def main():
     t1 = time.time()
 
     for v in queue_img('./video'):
+        transcript = []
         load_film('./video/' + v)
 
         change_color_crop(queue_img("./output"))
@@ -131,12 +132,12 @@ def main():
         all_name(transcript)  # 將名字縮寫還原
         transcript_final = " ".join(transcript)  # 將字串列表還原成字串
         # print(transcript_final)
-        pyperclip.copy(transcript_final)
+        #pyperclip.copy(transcript_final)
 
         doc = Document()
 
-        doc.add_paragraph(pyperclip.paste())
-        doc.save('./ocr_final/' + v[:-5] + '.docx')
+        doc.add_paragraph(transcript_final)
+        doc.save('./ocr_final/' + v[:-4] + '.docx')
 
     t2 = time.time()
 
