@@ -97,9 +97,9 @@ def main_map(l):
     img_gray = 255 - img_for_ocr
 
     # 逐字稿區
-    img_gray[225:1100, 80:980]
+    # img_gray[225:1100, 80:980]
     # episode區
-    img_gray[1200:1650, 80:980]
+    # img_gray[1200:1650, 80:980]
 
     # 以下要改
     a = pytesseract.image_to_string(img_for_ocr, lang="eng", config="--oem 1 --psm 6")
