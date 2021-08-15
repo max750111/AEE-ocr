@@ -1,3 +1,6 @@
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+from moviepy.editor import *
+import math
 import pytesseract
 import cv2
 import re
@@ -7,12 +10,26 @@ from os import listdir, mkdir
 import shutil
 from docx import Document
 import difflib
+from multiprocessing import Pool
+import pandas as pd
+
+
+
+
+def load_video_and_cut(split=4):
+    clip = VideoFileClip("all.mp4")
+    print(clip.duration)
+
+    t1, t2 = 0, clip.duration/split
+    for i in range(0, split):
+        t1, t2 = math.floor(0+clip.duration/4*i), math.floor(clip.duration / split +clip.duration/split*i)-1
+        ffmpeg_extract_subclip('all.mp4', t1, t2, targetname='./split_video/'+'part'+str(i+1)+'.mp4')
+        #print(t1, t2)
 
 
 def queue_img(path):
     files = listdir(path)
-    return files  # list
-
+    return [x for x in files if x[-3:] == 'mp4']  # list
 
 def load_film(film_filename):
     video_capture = cv2.VideoCapture(film_filename)
@@ -72,21 +89,6 @@ def main(frame):
         ocr_result = b.split("\n")  # 用\n分割每行，存成列表
         ocr_result = [x for x in ocr_result if x != (' ' and '')]
         #print(ocr_result)
-        if m.group(1) not in transcript:
-            #transcript[m.group(1)] = []
-            if 'This is an All Ears English' in ocr_result[0]:
-                transcript[m.group(1)] = []
-                print(m.group(1))
-                for str in ocr_result:
-                    transcript[m.group(1)].append(str)
-                print(transcript[m.group(1)])
-        else:
-            for str in ocr_result[2:-3]:  # 去除圖片頭尾可能的亂碼
-                # 將字串加入結果列表
-                if (str not in transcript[m.group(1)][-15:]) and delete_repeat(str, transcript[m.group(1)][-15:]):
-                    #print(str)
-                    transcript[m.group(1)].append(str)
-            print(transcript[m.group(1)])
 
 # all_name(transcript)  # 將名字縮寫還原
 
@@ -97,15 +99,9 @@ for i in transcript:
     doc = Document()
     doc.add_paragraph(transcript_final)
     doc.save(i + '.docx')
-# transcript_final = " ".join(transcript)  # 將字串列表還原成字串
-#
-#
-# doc = Document()
-#
-# doc.add_paragraph(transcript_final)
-# doc.save('./ocr_final/' + v[:-4] + '.docx')
 
 
 
 
-
+#load_video_and_cut()
+print(queue_img('./split_video'))
